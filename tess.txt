@@ -1,0 +1,253 @@
+Public Class Form1
+    Public biaya As Double
+    Public tempatDuduk As Double
+    Public waktu As Double
+    Public fasilitas As Double
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        If biayaCombo.Text = "" Or tempatDudukCombo.Text = "" Or waktuCombo.Text = "" Or fasilitasCombo.Text = "" Then
+            MsgBox("Mohon isi semua pilihan!")
+        ElseIf CheckBoxBiaya.CheckState = CheckState.Unchecked And CheckBoxTempatDuduk.CheckState = CheckState.Unchecked And CheckBoxWaktu.CheckState = CheckState.Unchecked And CheckBoxFasilitas.CheckState = CheckState.Unchecked Then
+            MsgBox("Mohon ceklis minimal salah satu faktor penting!")
+        ElseIf CheckBoxBiaya.CheckState = CheckState.Checked And CheckBoxTempatDuduk.CheckState = CheckState.Checked And CheckBoxWaktu.CheckState = CheckState.Checked And CheckBoxFasilitas.CheckState = CheckState.Checked Then
+            MsgBox("Mohon jangan ceklis semua faktor penting!")
+        ElseIf Not IsNumeric(DomainUpDown1.Text) Then
+            MsgBox("Mohon persentase hanya diisi dengan angka!")
+        ElseIf DomainUpDown1.Text * 1 = 0 Then
+            MsgBox("Mohon persentase tidak diisi dengan angka 0!")
+        ElseIf DomainUpDown1.Text > 90 Then
+            MsgBox("Mohon persentase tidak diisi dengan angka lebih dari 90!")
+        ElseIf DomainUpDown1.Text < 10 Then
+            MsgBox("Mohon persentase tidak diisi dengan angka kurang dari 10!")
+        Else
+            'Menemukan nilai biaya
+            If biayaCombo.Text = "Saya ingin biaya semurah-murahnya" Then
+                biaya = 1
+            ElseIf biayaCombo.Text = "Biayanya jangan terlalu mahal, yang sedang saja" Then
+                biaya = 2
+            ElseIf biayaCombo.Text = "Biaya tidak menjadi masalah bagi saya" Then
+                biaya = 3
+            Else
+                MsgBox("Mohon pilih opsi biaya dengan benar.")
+                Exit Sub
+            End If
+
+            'Menemukan nilai tempat duduk
+            If tempatDudukCombo.Text = "Saya tidak bermasalah dengan tempat duduk apapun" Then
+                tempatDuduk = 1
+            ElseIf tempatDudukCombo.Text = "Yang penting tempat duduknya jangan berhadapan" Then
+                tempatDuduk = 2
+            ElseIf tempatDudukCombo.Text = "Saya ingin tempat duduk yang terbaik" Then
+                tempatDuduk = 3
+            Else
+                MsgBox("Mohon pilih opsi tempat duduk dengan benar.")
+                Exit Sub
+            End If
+
+            'Menemukan nilai waktu
+            If waktuCombo.Text = "Saya menikmati perjalanan" Then
+                waktu = 1
+            ElseIf waktuCombo.Text = "Jangan terlalu lambat" Then
+                waktu = 2
+            ElseIf waktuCombo.Text = "Saya sedang buru-buru" Then
+                waktu = 3
+            Else
+                MsgBox("Mohon pilih opsi waktu dengan benar.")
+                Exit Sub
+            End If
+
+            'Menemukan nilai fasilitas
+            If fasilitasCombo.Text = "AC, TV, Stop Kontak, Toilet" Then
+                fasilitas = 1
+            ElseIf fasilitasCombo.Text = "AC, TV, Stop Kontak, Toilet, Rak bagasi, Rotary seat" Then
+                fasilitas = 2
+            ElseIf fasilitasCombo.Text = "AC, TV, Stop Kontak, Toilet, Rak bagasi, Meja makan, Reclining seat" Then
+                fasilitas = 3
+            Else
+                MsgBox("Mohon pilih opsi fasilitas dengan benar.")
+                Exit Sub
+            End If
+
+            Dim nilaiKereta(,) As Double = {{1.0, 1.0, 1.0, 1.0},
+                                            {2.0, 2.0, 2.0, 2.0},
+                                            {3.0, 3.0, 3.0, 3.0}}
+            Dim inputPengguna() As Double = {biaya, tempatDuduk, waktu, fasilitas}
+
+            System.Diagnostics.Debug.WriteLine(biaya & ", " & tempatDuduk & ", " & waktu & ", " & fasilitas)
+            Dim gap(,) As Double = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}
+            Dim bobot(,) As Double = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}
+
+
+            'menghitung nilai gap
+            For i = 0 To 3
+                For j = 0 To 2
+                    gap(j, i) = nilaiKereta(j, i) - inputPengguna(i)
+                    System.Diagnostics.Debug.WriteLine("i = " & i & ", j = " & j & ", nilai kereta = " & nilaiKereta(j, i) & ", input pengguna = " & inputPengguna(i) & ", gap = " & gap(j, i))
+                Next
+            Next
+
+            'menentukan nilai bobot
+            For i = 0 To 3
+                For j = 0 To 2
+                    If gap(j, i) = 0 Then
+                        bobot(j, i) = 3
+                    ElseIf gap(j, i) = 1 Or gap(j, i) = -1 Then
+                        bobot(j, i) = 2
+                    ElseIf gap(j, i) = 2 Or gap(j, i) = -2 Then
+                        bobot(j, i) = 1
+                    End If
+                    System.Diagnostics.Debug.WriteLine("i = " & i & ", j = " & j & ", gap = " & gap(j, i) & " bobot = " & bobot(j, i))
+                Next
+            Next
+
+            'mendapatkan nilai cf dan sf
+            Dim cfUser() As Double = {0, 0, 0, 0}
+            Dim jumlahcf = 0
+            Dim jumlahsf = 4
+            If CheckBoxBiaya.CheckState = CheckState.Checked Then
+                cfUser(0) = 1
+                jumlahcf = jumlahcf + 1
+                jumlahsf = jumlahsf - 1
+                System.Diagnostics.Debug.WriteLine("biaya = cf")
+            End If
+            If CheckBoxTempatDuduk.CheckState = CheckState.Checked Then
+                cfUser(1) = 1
+                jumlahcf = jumlahcf + 1
+                jumlahsf = jumlahsf - 1
+                System.Diagnostics.Debug.WriteLine("tempat duduk = cf")
+            End If
+            If CheckBoxWaktu.CheckState = CheckState.Checked Then
+                cfUser(2) = 1
+                jumlahcf = jumlahcf + 1
+                jumlahsf = jumlahsf - 1
+                System.Diagnostics.Debug.WriteLine("waktu = cf")
+            End If
+            If CheckBoxFasilitas.CheckState = CheckState.Checked Then
+                cfUser(3) = 1
+                jumlahcf = jumlahcf + 1
+                jumlahsf = jumlahsf - 1
+                System.Diagnostics.Debug.WriteLine("fasilitas = cf")
+            End If
+            System.Diagnostics.Debug.WriteLine("cf = " & jumlahcf & ", sf = " & jumlahsf)
+
+            'menghitung nilai cf dan sf
+            Dim cf(,) As Double = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}
+            Dim sf(,) As Double = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}
+            For i = 0 To 3
+                For j = 0 To 2
+                    If cfUser(i) = 1 Then
+                        cf(j, i) = bobot(j, i)
+                        System.Diagnostics.Debug.WriteLine("i = " & i & ", j = " & j & ", cf = " & cf(j, i))
+
+                    Else
+                        sf(j, i) = bobot(j, i)
+                        System.Diagnostics.Debug.WriteLine("i = " & i & ", j = " & j & ", sf = " & sf(j, i))
+
+                    End If
+                Next
+            Next
+
+            'menghitung nilai rerata CF dan SF
+            Dim rerataCF() As Double = {0, 0, 0}
+            Dim rerataSF() As Double = {0, 0, 0}
+            For i = 0 To 2
+                Dim cfTemp = 0
+                Dim sfTemp = 0
+                For j = 0 To 3
+                    cfTemp = cfTemp + cf(i, j)
+                    sfTemp = sfTemp + sf(i, j)
+                Next
+                rerataCF(i) = cfTemp / jumlahcf
+                rerataSF(i) = sfTemp / jumlahsf
+                System.Diagnostics.Debug.WriteLine("Rerata CF ke " & i & " = " & rerataCF(i) & ", Rerata SF = " & rerataSF(i))
+            Next
+
+            'menghitung persentase
+            Dim persentaseCF() As Double = {0, 0, 0}
+            Dim persentaseSF() As Double = {0, 0, 0}
+            Dim nilaiCF = DomainUpDown1.Text
+            Dim nilaiSF = 100 - nilaiCF
+            System.Diagnostics.Debug.WriteLine("nilai cf = " & nilaiCF & ", nilai sf = " & nilaiSF)
+            For i = 0 To 2
+                persentaseCF(i) = rerataCF(i) * nilaiCF / 100
+                persentaseSF(i) = rerataSF(i) * nilaiSF / 100
+                System.Diagnostics.Debug.WriteLine("nilai cf = " & persentaseCF(i) & ", nilai sf = " & persentaseSF(i))
+            Next
+
+            'merangking kereta
+            Dim nilaiEkonomi As Double
+            Dim nilaiBisnis As Double
+            Dim nilaiEksekutif As Double
+            nilaiEkonomi = persentaseCF(0) + persentaseSF(0)
+            nilaiBisnis = persentaseCF(1) + persentaseSF(1)
+            nilaiEksekutif = persentaseCF(2) + persentaseSF(2)
+            System.Diagnostics.Debug.WriteLine("Ekonomi = " & nilaiEkonomi & ", Bisnis = " & nilaiBisnis & ", Eksekutif = " & nilaiEksekutif)
+            'manual sort
+            Dim ranking() As Double = {nilaiEkonomi, nilaiBisnis, nilaiEksekutif}
+            Dim result As String
+            Dim DataEkonomi = "kereta yang kami rekomendasikan adalah yang kelas Ekonomi dengan pilihan kereta : Sancaka, Mutiara Selatan dan Wijayakusuma."
+            Dim DataBisnis = "kereta yang kami rekomendasikan adalah yang kelas Bisnis dengan pilihan kereta : Ranggajati."
+            Dim DataEksekutif = "kereta yang kami rekomendasikan adalah yang kelas Eksekutif dengan pilihan kereta : Argo Wilis, Sancaka, Ranggajati, Bima, Wijayakusuma, Turangga dan Mutiara Selatan."
+            result = "Berdasarkan data yang Anda masukkan "
+            If nilaiEkonomi > nilaiBisnis Then
+                If nilaiEkonomi > nilaiEksekutif Then
+                    ranking(0) = 1
+                    result = result & DataEkonomi & vbCrLf & vbCrLf
+                    If nilaiBisnis > nilaiEksekutif Then
+                        ranking(1) = 2
+                        ranking(2) = 3
+                        result = result & "Berikutnya " & DataBisnis & vbCrLf & vbCrLf & "Berikutnya " & DataEksekutif
+                    Else
+                        ranking(1) = 3
+                        ranking(2) = 2
+                        result = result & "Berikutnya " & DataEksekutif & vbCrLf & vbCrLf & "Berikutnya " & DataBisnis
+                    End If
+                Else
+                    ranking(2) = 1
+                    result = result & DataEksekutif & vbCrLf & vbCrLf
+                    If nilaiEkonomi > nilaiBisnis Then
+                        ranking(0) = 2
+                        ranking(1) = 3
+                        result = result & "Berikutnya " & DataEkonomi & vbCrLf & vbCrLf & "Berikutnya " & DataBisnis
+                    Else
+                        ranking(0) = 3
+                        ranking(1) = 2
+                        result = result & "Berikutnya " & DataBisnis & vbCrLf & vbCrLf & "Berikutnya " & DataEkonomi
+                    End If
+                End If
+            Else
+                If nilaiBisnis > nilaiEksekutif Then
+                    ranking(1) = 1
+                    result = result & DataBisnis & vbCrLf & vbCrLf
+                    If nilaiEkonomi > nilaiEksekutif Then
+                        ranking(0) = 2
+                        ranking(2) = 3
+                        result = result & "Berikutnya " & DataEkonomi & vbCrLf & vbCrLf & "Berikutnya " & DataEksekutif
+                    Else
+                        ranking(0) = 3
+                        ranking(2) = 2
+                        result = result & "Berikutnya " & DataEksekutif & vbCrLf & vbCrLf & "Berikutnya " & DataEkonomi
+                    End If
+                Else
+                    ranking(2) = 1
+                    result = result & DataEksekutif & vbCrLf & vbCrLf
+                    If nilaiEkonomi > nilaiBisnis Then
+                        ranking(0) = 2
+                        ranking(1) = 3
+                        result = result & "Berikutnya " & DataEkonomi & vbCrLf & vbCrLf & "Berikutnya " & DataBisnis
+                    Else
+                        ranking(0) = 3
+                        ranking(1) = 2
+                        result = result & "Berikutnya " & DataBisnis & vbCrLf & vbCrLf & "Berikutnya " & DataEkonomi
+                    End If
+                End If
+            End If
+
+
+            'menampilkan hasil
+            Hasil.Text = result
+
+
+        End If
+    End Sub
+
+End Class
